@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">PictureFinder</string>
+    <string name="KEY">4hhd43tsw4hz3nnaa9n64tet</string>
+    <string name="URLBase">https://api.gettyimages.com</string>
+    <string name="find_a_picture">Find a picture</string>
+    <string name="Find">Find!</string>
+</resources>
