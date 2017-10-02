@@ -19,7 +19,7 @@ public class ResponseImage extends RealmObject {
     }
 
     public void setImage(byte[] image) {
-        this.image = new byte[]{};
+        this.image = image;
     }
 
     public String getName() {

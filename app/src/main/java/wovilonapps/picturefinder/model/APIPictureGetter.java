@@ -2,9 +2,11 @@ package wovilonapps.picturefinder.model;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,6 +15,8 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import retrofit2.Call;
@@ -21,6 +25,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import wovilonapps.picturefinder.R;
+import wovilonapps.picturefinder.db.RealmDbManager;
+import wovilonapps.picturefinder.interfaces.OnLoadFinisCallBack;
+import wovilonapps.picturefinder.io.AsynkPicassoLoader;
 import wovilonapps.picturefinder.io.GetRequest;
 
 public class APIPictureGetter {
@@ -39,10 +46,11 @@ public class APIPictureGetter {
     String imageURL = null;
     ImageView imageView;
     Drawable drawable;
+    OnLoadFinisCallBack callBack;
 
-    public APIPictureGetter(Context context, ImageView imageView){
+    public APIPictureGetter(Context context, OnLoadFinisCallBack onLoadFinisCallBack){
         this.context = context;
-        this.imageView = imageView;
+        this.callBack = onLoadFinisCallBack;
     }
 
     public void getPicture(String requestString){
@@ -59,10 +67,6 @@ public class APIPictureGetter {
         useGetMethod(requestString);
     }
 
-    private void getImageFromURL(String url){
-        Picasso.with(context).load(url).into(imageView);
-
-    }
 
 
     //get weather by city (Retrofit)
@@ -83,9 +87,14 @@ public class APIPictureGetter {
                         JSONObject json = new JSONObject(jsonString);
                         imageURL = json.getJSONArray("images").getJSONObject(0).getJSONArray("display_sizes")
                                 .getJSONObject(0).getString("uri");
-                        getImageFromURL(imageURL);
+                        AsynkPicassoLoader loader = new AsynkPicassoLoader(context, imageURL, requestString, callBack);
+                        loader.execute();
 
-                    }catch (JSONException jse) {Log.d("MyLOG", "JSONException in APIPictureGetter.useGetMethod");}
+                    }catch (JSONException jse) {
+                        Toast.makeText(context,context.getResources().getString(R.string.serverError),
+                                Toast.LENGTH_LONG).show();
+
+                        Log.d("MyLOG", "JSONException in APIPictureGetter.useGetMethod");}
 
                 }catch (NullPointerException npe) {Log.d("MyLOG", "NullPointerException at useGerMethod()");}
             }
@@ -111,6 +120,12 @@ public class APIPictureGetter {
 
     private void setDrawable(){
         imageView.setImageDrawable(drawable);
+    }
+
+    private static byte[] bitmapToBytes(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+        return stream.toByteArray();
     }
 
 }

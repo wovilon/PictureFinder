@@ -35,6 +35,7 @@ public class RealmDbManager {
 
         for (int i=0; i<list.size(); i++){
             Log.d("MyLOG", list.get(i).getName());
+            //Log.d("MyLOG", list.get(i).getImage().toString());
         }
         return new ArrayList(mRealm.where(ResponseImage.class).findAll());
     }

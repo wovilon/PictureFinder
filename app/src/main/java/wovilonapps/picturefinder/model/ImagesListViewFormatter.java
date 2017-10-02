@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import wovilonapps.picturefinder.R;
+import wovilonapps.picturefinder.binder.ViewBinder;
 import wovilonapps.picturefinder.db.RealmDbManager;
 
 
@@ -32,6 +34,8 @@ public class ImagesListViewFormatter {
 
     public void fillListView(){
         responseImages = new RealmDbManager(context).getAll();
+        //imageView.setImageBitmap(getBitmapFromBytes(responseImages.get(0).getImage()));
+
         String name = "name";
         String image = "image";
 
@@ -50,7 +54,9 @@ public class ImagesListViewFormatter {
         int[] to = {R.id.itemText, R.id.itemImage};
 
         final SimpleAdapter adapter = new SimpleAdapter(context, data, R.layout.images_list_item, from, to);
+        adapter.setViewBinder(new ViewBinder());
         listView.setAdapter(adapter);
+
 
     }
 
