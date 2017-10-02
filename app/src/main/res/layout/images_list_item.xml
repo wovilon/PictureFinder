@@ -27,6 +27,7 @@
         android:layout_height="80dp"
         android:layout_marginLeft="32dp"
         android:layout_marginTop="8dp"
+        android:paddingBottom="4pt"
         app:layout_constraintLeft_toRightOf="@+id/itemText"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@mipmap/ic_launcher" />
