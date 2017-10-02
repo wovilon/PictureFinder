@@ -1,5 +1,6 @@
 package wovilonapps.picturefinder;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -7,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -33,52 +35,45 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //initialize UI views
         editTextSearch = (EditText) findViewById(R.id.editTextSearch);
         listView = (ListView)findViewById(R.id.imagesListView);
         dbManager = new RealmDbManager(this);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
+        //initialize callback (when loading of image finishes, it works)
         onLoadFinisCallBack = new OnLoadFinisCallBack() {
             @Override
             public void onFinish() {
-                listViewFormatter.fillListView();
-                progressBar.setVisibility(View.INVISIBLE);
+                listViewFormatter.fillListView(); // refresh listView
+                progressBar.setVisibility(View.INVISIBLE);  // hide progress circle
             }
         };
 
-        /*ResponseImage responseImage = new ResponseImage();
-        responseImage.setName("name");
-        responseImage.setImage(drawableToBytes(getDrawable(R.mipmap.ic_launcher_round)));
-        dbManager.add(responseImage)*/;
-
+        // refresh listView (at activity start)
         listViewFormatter = new ImagesListViewFormatter(this, listView);
-
 
     }
 
     public void onButtonSearchClick(View view) {
         APIPictureGetter apiPictureGetter = new APIPictureGetter(this, onLoadFinisCallBack);
-        apiPictureGetter.getPicture(editTextSearch.getText().toString());
-        progressBar.setVisibility(View.VISIBLE);
+        apiPictureGetter.getPicture(editTextSearch.getText().toString()); //start API request
+        progressBar.setVisibility(View.VISIBLE); // setup progress circle
         progressBar.animate();
+
+        // Check if no view has focus and hide keyboard
+        View v = this.getCurrentFocus();
+        if (v != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        dbManager.close();
+        dbManager.close();  //close base
     }
 
-
-/*    private static byte[] drawableToBytes(Drawable drawable) {
-        Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
-        return stream.toByteArray();
-    }
-
-    public static Drawable bytesToDrawable(byte[] image) {
-        return new BitmapDrawable(BitmapFactory.decodeByteArray(image, 0, image.length));
-    }*/
 }

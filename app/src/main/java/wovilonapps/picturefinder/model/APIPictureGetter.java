@@ -2,36 +2,24 @@ package wovilonapps.picturefinder.model;
 
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.squareup.picasso.Picasso;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import wovilonapps.picturefinder.R;
-import wovilonapps.picturefinder.db.RealmDbManager;
 import wovilonapps.picturefinder.interfaces.OnLoadFinisCallBack;
 import wovilonapps.picturefinder.io.AsynkPicassoLoader;
 import wovilonapps.picturefinder.io.GetRequest;
 
 public class APIPictureGetter {
-    Context context;
+    private Context context;
 
     //Restofit part of variables
     private String URL;
@@ -41,18 +29,15 @@ public class APIPictureGetter {
     //private Gson gson=new GsonBuilder().create();
     private Retrofit retrofit_get;
     private GetRequest interf_get;
-    private Retrofit image_get;
-    private GetRequest interf_image_get;
-    String imageURL = null;
-    ImageView imageView;
-    Drawable drawable;
-    OnLoadFinisCallBack callBack;
+    private String imageURL = null;
+    private OnLoadFinisCallBack callBack;
 
     public APIPictureGetter(Context context, OnLoadFinisCallBack onLoadFinisCallBack){
         this.context = context;
         this.callBack = onLoadFinisCallBack;
     }
 
+    // initiates request
     public void getPicture(String requestString){
         URL = context.getString(R.string.URLBase);
         KEY = context.getResources().getString(R.string.KEY);
@@ -68,8 +53,7 @@ public class APIPictureGetter {
     }
 
 
-
-    //get weather by city (Retrofit)
+    //implements request processing (asynk)
     private void useGetMethod(final String requestString) {
 
         Call<Object> call = interf_get.GETMethodRequest("id,title,thumb", "best", requestString);
@@ -82,11 +66,13 @@ public class APIPictureGetter {
                     Log.d("MyLOG", "response body: " + response1.body().toString());
                     Gson gson = new Gson();
 
+                    //parsing JSON
                     String jsonString = gson.toJson(response1.body());
                     try {
                         JSONObject json = new JSONObject(jsonString);
                         imageURL = json.getJSONArray("images").getJSONObject(0).getJSONArray("display_sizes")
                                 .getJSONObject(0).getString("uri");
+                        // make asynk image loading from url
                         AsynkPicassoLoader loader = new AsynkPicassoLoader(context, imageURL, requestString, callBack);
                         loader.execute();
 
@@ -107,25 +93,5 @@ public class APIPictureGetter {
 
     }
 
-
-    private Drawable loadImageFromURL(String url) {
-        try {
-            InputStream is = (InputStream) new URL(url).getContent();
-            Drawable d = Drawable.createFromStream(is, null);
-            return d;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private void setDrawable(){
-        imageView.setImageDrawable(drawable);
-    }
-
-    private static byte[] bitmapToBytes(Bitmap bitmap) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
-        return stream.toByteArray();
-    }
 
 }

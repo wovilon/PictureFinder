@@ -18,6 +18,7 @@ public class RealmDbManager {
     Context context;
     Realm mRealm;
 
+    // class for work with database
     public RealmDbManager(Context context) {
         mRealm = Realm.getInstance(context);
     }
@@ -40,17 +41,6 @@ public class RealmDbManager {
         return new ArrayList(mRealm.where(ResponseImage.class).findAll());
     }
 
-    /*private static byte[] drawableToBytes(Drawable drawable) {
-        Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
-        return stream.toByteArray();
-    }
-
-    public static Drawable bytesToDrawable(byte[] image) {
-
-        return new BitmapDrawable(BitmapFactory.decodeByteArray(image, 0, image.length));
-    }*/
 
     public void close(){
         mRealm.close();
